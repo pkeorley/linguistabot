@@ -4,5 +4,8 @@
 - `[]` - required argument
 - `()` - optional argument
 ****
-- `/linguista word-add [word: Keyword or phrase] [image: Attached image]`
-- `/linguista word-get (word: Keyword or phrase])`
+- `/linguista word-add [word] [image]`
+- `/linguista word-get (word)`
+- `/linguista word-delete [word]`
+- `/linguista learn`
+- `/bot`
