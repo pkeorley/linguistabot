@@ -1,4 +1,5 @@
 datas = {
     "TOKEN": "",
-    "MONGO_URL": ""
+    "MONGO_URL": "",
+    "BOT_VERSION": "1.0.1"
 }
