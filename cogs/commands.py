@@ -202,7 +202,8 @@ class Commands(commands.Cog):
     ):
         await interaction.response.defer()
 
-        phrases = self.reverso_manager.find_by_word(phrase=word, dest="uk")
+        user = await self.bot.database.get_user(interaction.author.id)
+        phrases = self.reverso_manager.find_by_word(phrase=word, dest=user["language"])
         data = [(item["src"]["phrase"], item["dest"]["phrase"]) for item in phrases]
 
         paginator = Paginator(data)
