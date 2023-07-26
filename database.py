@@ -13,7 +13,8 @@ class Database:
         if not await self.db.word.find_one({"user_id": user_id}):
             await self.db.word.insert_one({
                 "user_id": user_id,
-                "phrases": []
+                "phrases": [],
+                "language": "en"
             })
 
     async def push_word(self, user_id: int, word: str, image_url: str) -> None:
@@ -44,6 +45,16 @@ class Database:
         }, {
             "$set": {
                 "phrases": phrases
+            }
+        })
+
+    async def set_user_language(self, user_id: int, language: str):
+        await self.push_user(user_id)
+        await self.db.word.update_one({
+            "user_id": user_id
+        }, {
+            "$set": {
+                "language": language
             }
         })
 
@@ -80,5 +91,3 @@ class Database:
                 "phrases": phrases
             }
         })
-
-

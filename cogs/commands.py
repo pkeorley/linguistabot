@@ -5,9 +5,11 @@ import psutil
 from disnake.ext import commands
 import requests
 
-from config import datas
+from config import datas, LANGUAGES
 from main import Linguista
 from modules.buttons import Images
+from modules.paginator import Paginator
+from modules.reverso import ReversoManager
 
 
 async def linguista_word_get_word_autocomplete(interaction: disnake.ApplicationCommandInteraction, string: str = None):
@@ -25,17 +27,12 @@ async def linguista_word_get_word_autocomplete(interaction: disnake.ApplicationC
 class Commands(commands.Cog):
     def __init__(self, bot: Linguista):
         self.bot = bot
+        self.reverso_manager = ReversoManager()
 
-    @commands.slash_command(
-        name="linguista",
-        description="."
-    )
+    @commands.slash_command(name="linguista")
     async def linguista(
             self,
-            interaction: disnake.ApplicationCommandInteraction,
-            word: str = commands.Param(
-                description="."
-            )
+            interaction: disnake.ApplicationCommandInteraction
     ):
         pass
 
@@ -158,11 +155,59 @@ class Commands(commands.Cog):
                 f"the information about the bot `(v{datas['BOT_VERSION']})`\n- "
                 "[Official server](https://discord.gg/WDTtfSqSnN) with the "
                 f"[bot developer](https://discord.com/users/{application.owner.id})\n"
-                f"- [GitHub Repository](https://github.com/pkeorley/linguistabot) with the source code\n{'-' * 50}\n"
+                f"- [GitHub Repository](https://github.com/pkeorley/linguistabot) with the source code\n{'—' * 50}\n"
                 f"- Bot websocket latency: **{round(self.bot.latency * 1000, 2)}ms**\n"
                 f"- CPU Usage: **{psutil.cpu_percent()}%**\n"
             )
         )
+
+    @commands.slash_command(name="reverso")
+    async def reverso(
+            self,
+            interaction: disnake.ApplicationCommandInteraction
+    ):
+        pass
+
+    @reverso.sub_command(
+        name="set-user-language",
+        description="..."
+    )
+    async def reverso_set_user_language(
+            self,
+            interaction: disnake.ApplicationCommandInteraction,
+            language: str = commands.Param(
+                description="...",
+                choices=list(LANGUAGES.values())
+            )
+    ):
+        await interaction.response.defer()
+
+        language_code = ({v: k for k, v in LANGUAGES.items()})[language]
+        await self.bot.database.set_user_language(interaction.author.id, language=language_code)
+
+        await interaction.edit_original_response(
+            content=f"✅ You have successfully changed the standard phrase translation language to `{language}`"
+        )
+
+    @reverso.sub_command(
+        name="search",
+        description="..."
+    )
+    async def reverso_search(
+            self,
+            interaction: disnake.ApplicationCommandInteraction,
+            word: str = commands.Param(
+                description="..."
+            )
+    ):
+        await interaction.response.defer()
+
+        phrases = self.reverso_manager.find_by_word(phrase=word, dest="uk")
+        data = [(item["src"]["phrase"], item["dest"]["phrase"]) for item in phrases]
+
+        paginator = Paginator(data)
+        await paginator.edit_page(interaction, index=0)
+        await interaction.edit_original_response(view=paginator)
 
 
 def setup(bot):

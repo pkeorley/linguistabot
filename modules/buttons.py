@@ -37,7 +37,7 @@ class Images(disnake.ui.View):
         word = phrase["word"].replace("#", "$")
 
         await interaction.edit_original_response(
-            content=f"## ({self._index + 1:,}/{len(phrases):,}) | [{word}]({phrase['image_url']})",
+            content=f"## ({self._index + 1:,}/{len(phrases):,}) | [🖼️]({phrase['image_url']}) | ||{word}||",
             # files=[file]
         )
 
@@ -59,26 +59,8 @@ class Images(disnake.ui.View):
         await self.update_content(interaction, phrases)
 
     @disnake.ui.button(
-        emoji="➡️",
-        style=disnake.ButtonStyle.blurple
-    )
-    async def to_right(self, button: disnake.Button, interaction: disnake.ApplicationCommandInteraction):
-        await interaction.response.defer()
-
-        phrases = await self.bot.database.get_phrases(interaction.author.id, learned=False)
-
-        if self._index <= len(phrases):
-            self._index += 1
-
-        if self._index > len(phrases) - 1:
-            self._index = 0
-
-        await self.update_content(interaction, phrases)
-
-    @disnake.ui.button(
         emoji="✅",
-        style=disnake.ButtonStyle.green,
-        row=1
+        style=disnake.ButtonStyle.green
     )
     async def to_learned(self, button: disnake.Button, interaction: disnake.ApplicationCommandInteraction):
         await interaction.response.defer()
@@ -98,10 +80,18 @@ class Images(disnake.ui.View):
         )
 
     @disnake.ui.button(
-        emoji="⛔",
-        style=disnake.ButtonStyle.red,
-        row=1,
-        disabled=True
+        emoji="➡️",
+        style=disnake.ButtonStyle.blurple
     )
-    async def to_later(self, button: disnake.Button, interaction: disnake.ApplicationCommandInteraction):
+    async def to_right(self, button: disnake.Button, interaction: disnake.ApplicationCommandInteraction):
         await interaction.response.defer()
+
+        phrases = await self.bot.database.get_phrases(interaction.author.id, learned=False)
+
+        if self._index <= len(phrases):
+            self._index += 1
+
+        if self._index > len(phrases) - 1:
+            self._index = 0
+
+        await self.update_content(interaction, phrases)
